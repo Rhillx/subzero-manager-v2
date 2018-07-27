@@ -64,7 +64,7 @@ console.log(req.body)
 });
 
 //Update product api
-app.put('/api/product/update', (req, res)=>{
+app.put('/api/product/update-add', (req, res)=>{
 
     const flavor = req.body.flavor;
     const val = req.body.valChanged;
@@ -78,6 +78,27 @@ app.put('/api/product/update', (req, res)=>{
         connection.query(UPDATE_PRODUCT2, [newVal, flavor], (err, data)=>{
             if(err) throw err;
             console.log(data)
+            
+        })
+    })
+})
+
+//Update product api
+app.put('/api/product/update-subtract', (req, res)=>{
+
+    const flavor = req.body.flavor;
+    const val = req.body.valChanged;
+
+    const UPDATE_PRODUCT1 = "SELECT quanity - ? AS newVal FROM product_inventory WHERE flavor = ?";
+    const UPDATE_PRODUCT2 = "UPDATE product_inventory SET quanity = ? WHERE flavor = ?";
+
+    connection.query(UPDATE_PRODUCT1, [val, flavor] ,(err, data)=>{
+        if (err) throw err;
+        const newVal = data[0].newVal
+        connection.query(UPDATE_PRODUCT2, [newVal, flavor], (err, data)=>{
+            if(err) throw err;
+            console.log(data)
+            
         })
     })
 })
@@ -89,6 +110,36 @@ app.delete('/api/product/delete', (req, res)=>{
     const DELETE_PRODUCT = "DELETE FROM product_inventory WHERE flavor = ?";
 
     connection.query(DELETE_PRODUCT, [fv], (err, data)=>{
+        if (err) throw err;
+        console.log(data)
+    })
+})
+
+//GET TRANSACTIONS
+app.get('/api/transactions', (req, res)=>{
+
+    const GET_TRANS  = 'SELECT * FROM transaction';
+
+    connection.query(GET_TRANS, (err, data)=>{
+        if(err) throw err;
+        res.json(data);
+    })
+})
+
+//POST TRANSACTION && UPDATE PRODUCT INVENTORY
+app.post('/api/post/transaction', (req, res)=>{
+    const quanity = req.body.quanity;
+    const flavor = req.body.flavor;
+    const trans = {
+        customer_name: req.body.customer,
+        flavor_purchased: req.body.flavor,
+        quanity_purchased: req.body.quanity,
+        amount_paid: req.body.amount,
+    };
+    const NEW_TRANSACTION = 'INSERT INTO transaction SET ?';
+    const UPDATE_PRODUCT = "UPDATE product_inventory SET quanity = ? WHERE flavor = ?";
+
+    connection.query(NEW_TRANSACTION, trans, (err, data)=>{
         if (err) throw err;
         console.log(data)
     })
