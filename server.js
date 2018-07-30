@@ -81,6 +81,7 @@ app.get('/api/product', (req, res)=>{
         })
     })
 /////////////////////////////////////
+
 //UPDATE PRODUCT BY SUBTRACTING INVENTORY
     app.put('/api/product/update-subtract', (req, res)=>{
 
@@ -129,7 +130,7 @@ app.get('/api/product', (req, res)=>{
 ////////////////////////////
 
 //POST MATERIAL INVENTORY API
-    app.post('/api/material/add', (req, res)=>{
+    app.post('/api/materials/post', (req, res)=>{
         const stock = {
             item: req.body.item,
             quanity: req.body.quanity
@@ -145,10 +146,91 @@ app.get('/api/product', (req, res)=>{
     })
 ////////////////////////////
 
+//UPDATE MATERIAL INVENTORY (ADD)
+    app.put('/api/materials/update-add', (req, res)=>{
 
+        const item = req.body.item;
+        const val = req.body.valChanged;
 
+        const UPDATE_PRODUCT1 = "SELECT SUM(quanity + ?) AS newVal FROM material_inventory WHERE item = ?";
+        const UPDATE_PRODUCT2 = "UPDATE material_inventory SET quanity = ? WHERE item = ?";
 
+        connection.query(UPDATE_PRODUCT1, [val, item] ,(err, data)=>{
+            if (err) throw err;
+            const newVal = data[0].newVal
+            connection.query(UPDATE_PRODUCT2, [newVal, item], (err, data)=>{
+                if(err) throw err;
+                console.log(data)
+             })
+        })
+    })
+///////////////////////////////////////////
 
+//UPDATE MATERIAL (SUBTRACT) IN MYSQL DATABASE
+    app.put('/api/materials/update-subtract', (req, res)=>{
+
+        const item = req.body.item;
+        const val = req.body.valChanged;
+
+        const UPDATE_PRODUCT1 = "SELECT quanity - ? AS newVal FROM material_inventory WHERE item = ?";
+        const UPDATE_PRODUCT2 = "UPDATE material_inventory SET quanity = ? WHERE item = ?";
+
+        connection.query(UPDATE_PRODUCT1, [val, item] ,(err, data)=>{
+            if (err) throw err;
+            const newVal = data[0].newVal
+             connection.query(UPDATE_PRODUCT2, [newVal, item], (err, data)=>{
+                if(err) throw err;
+                console.log(data)
+                
+            })
+        })
+    })
+//////////////////////////////////////////////
+
+//DELETE MATERIAL ITEM API
+    app.delete('/api/materials/delete', (req, res)=>{
+        const item = req.body.item;
+
+        const DELETE_MATERIAL = "DELETE FROM material_inventory WHERE item = ?";
+
+        connection.query(DELETE_MATERIAL, [item], (err, data)=>{
+            if (err) throw err;
+
+            console.log(data)
+        })
+    })
+//////////////////////////
+
+// FETCH EXPENSES
+    app.get('/api/expenses', (req, res)=>{
+        const GET_EXPENSES = "SELECT * FROM expenses";
+
+        connection.query(GET_EXPENSES, (err, data)=>{
+            const expenses = data
+            if (err) throw err;
+            res.json(expenses)
+        })
+    })
+/////////////////
+
+// POST NEW EXPENSES
+    app.post('/api/expenses/post', (req, res)=>{
+        const expense = {
+            expense_item: req.body.expense_item,
+            paid_to: req.body.paid_to,
+            expense_amount: req.body.expense,
+            paid_from: req.body.paid_from
+        }
+
+        const CREATE_EXPENSE = "INSERT INTO expenses SET ?";
+
+        connection.query(CREATE_EXPENSE, expense, (err, data)=>{
+            if(err) throw err;
+
+            console.log(data)
+        })
+    })
+////////////////////
 
 
 
