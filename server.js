@@ -266,4 +266,17 @@ app.post('/api/post/transactions', (req, res)=>{
 })
 
 
+//GET NOTES API
+    app.get('/api/notes', (req, res)=>{
+        const GET_NOTES = "SELECT * FROM notes";
+
+        connection.query(GET_NOTES, (err, data)=>{
+            if (err) throw err;
+            const notes = data;
+            res.json(notes)
+        })
+    })
+//////////////
+
+
 app.listen(port, ()=> console.log(`server started on port ${port}`));
