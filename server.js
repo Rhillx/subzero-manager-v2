@@ -264,6 +264,92 @@ app.post('/api/post/transactions', (req, res)=>{
         console.log(data)
     })
 })
+////////////////////////////////
+
+//GET ALL BATCHES API
+    app.get('/api/batches', (req, res)=>{
+        const GET_BATCHES = "SELECT * FROM batches";
+
+        connection.query(GET_BATCHES, (err, data)=>{
+            if (err) throw err;
+
+            const batches = data
+            res.json(batches);
+        })
+    })
+/////////////////////
+
+//POST BATCH API
+    app.post('/api/batches', (req, res)=>{
+        let batch = {}
+        if(req.body.method === "BHO"){
+            batch = {
+                method: req.body.method,
+                material_amount: req.body.material_amount,
+                recovery_time: req.body.recovery_time,
+                recovery_temp: req.body.recovery_temp,
+                passes: req.body.passes,
+                dry_ice_amount: req.body.dry_ice_amount,
+                wz: req.body.wz,
+                wz_time: req.body.wz_time,
+                wz_method: req.body.wz_method
+            }
+        } else if(req.body.method === "QWET"){
+            batch = {
+                method: req.body.method,
+                material_amount: req.body.material_amount,
+                recovery_time: req.body.recovery_time,
+                recovery_temp: req.body.recovery_temp,
+                ethanol_amount: req.body.ethanol_amount,
+                soak_time: req.body.soak_time,
+                dry_ice_amount: req.body.dry_ice_amount
+            }
+        }
+
+        const POST_BATCH = "INSERT INTO batches SET ?";
+
+        connection.query(POST_BATCH, batch, (err, data)=>{
+            if (err) throw err;
+
+            console.log(data)
+        })
+    })
+////////////////
+
+//UPDATE BATCH IN PROGRESS API
+    app.put('/api/batches/:id', (req, res)=>{
+       
+         const {purge_time, purge_temp, flips, id} = req.body;
+         
+         const PURGE_UPDATE= "UPDATE batches SET purge_time = ?, purge_temp = ?, flips = ? WHERE id = ?";
+
+        connection.query(PURGE_UPDATE, [purge_time, purge_temp, flips, id], (err, data)=>{
+            if(err) throw err;
+
+            console.log(data)
+        })
+    })
+//////////////////////////////
+
+//UPDATE BATCH COMPLETE API
+    app.put('/api/batches/:id', (req, res)=>{
+        const {total_yield, cut, use_case, carts_produced, id} = req.body;
+
+        let BATCH_COMPLETE = ""
+        if(req.body.use_case != "OIL"){
+            BATCH_COMPLETE = "UPDATE batches SET total_yield =" + req.body.total_yield + ", use_case = " + req.body.use_case + "WHERE id = " + req.body.id ;
+        } else {
+            BATCH_COMPLETE = "UPDATE batches SET total_yield = " + req.body.total_yield + ", cut = " + req.body.cut + ", use_case = " + req.body.use_case + ", carts_produced = " + req.body.carts_produced + " WHERE id = " + req.body.id;
+        }
+
+        connection.query(BATCH_COMPLETE, (err, data)=>{
+            if (err) throw err;
+
+            console.log(data)
+        })
+
+    })
+///////////////////////////
 
 
 //GET NOTES API
@@ -277,6 +363,23 @@ app.post('/api/post/transactions', (req, res)=>{
         })
     })
 //////////////
+
+//POST NOTES API
+    app.post('/api/notes/post', (req, res)=>{
+        const note = {
+            note: req.body.note,
+            user_id: req.body.user
+        }
+
+        const POST_NOTE = "INSERT INTO notes SET ?";
+
+        connection.query(POST_NOTE, note, (err, data)=>{
+            if(err) throw err;
+
+            console.log(data)
+        })
+    })
+////////////////
 
 
 app.listen(port, ()=> console.log(`server started on port ${port}`));
